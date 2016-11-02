@@ -1,0 +1,21 @@
+%YAML 1.1
+---
+af-packet:
+  - interface: suricata_iface1
+    threads: 1
+    defrag: yes
+    cluster-type: cluster_flow
+    cluster-id: 98
+    copy-mode: ips
+    copy-iface: suricata_iface2
+    buffer-size: 64535
+    use-mmap: yes
+  - interface: suricata_iface2
+    threads: 1
+    cluster-id: 97
+    defrag: yes
+    cluster-type: cluster_flow
+    copy-mode: ips
+    copy-iface: suricata_iface1
+    buffer-size: 64535
+    use-mmap: yes
