@@ -11,6 +11,9 @@ This is a special release of autosuricata meant to be used as a part of Project:
 
 This installer, and its supporting files are meant to be consumed with PROJECT:AVATAR, my massive virtual lab book. Particularly, the chapter entitled "IDS/IPS" installation. All the instructions you should need should be included in the book.
 
+Instructions:
+fill out full_autosuricata.conf, then run "autosuricata-dev-AVATAR.sh" as root. Wait for the system to reboot, and you should be all set.
+
 Thanks,
 
 da_667
