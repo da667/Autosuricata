@@ -17,7 +17,7 @@ do_start()
 {
     echo "Starting Suricata" 
     /sbin/ifconfig suricata_iface1 up -arp -multicast promisc
-	/sbin/ifconfig suricata_iface2 up -arp -multicase promisc
+    /sbin/ifconfig suricata_iface2 up -arp -multicase promisc
     $SURICATAD $OPTIONS
 	if [ $? -eq 0 ]; then
 		echo "Suricata successfully started."
