@@ -206,7 +206,7 @@ echo "sid_msg_version=2" >> pulledpork.tmp
 echo "sid_changelog=/var/log/sid_changes.log" >> pulledpork.tmp
 echo "snort_path=/usr/local/bin/suricata" >> pulledpork.tmp
 echo "config_path=/usr/local/etc/suricata.yaml" >> pulledpork.tmp
-echo "version=0.7.2" >> pulledpork.tmp
+echo "version=0.7.3" >> pulledpork.tmp
 cp pulledpork.tmp pulledpork.conf
 
 print_good "pulledpork.conf generated."
