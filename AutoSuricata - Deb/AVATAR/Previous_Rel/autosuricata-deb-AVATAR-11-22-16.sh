@@ -133,7 +133,7 @@ fi
 
 ########################################
 
-#These packages are required at a minimum to build suricata + its component libraries. The perl requirements are for pulledpork.pl
+#These packages are required at a minimum to build snort and barnyard + their component libraries. The perl requirements are for pulledpork.pl
 #A package name changed on Ubuntu 18.04, and we need to account for that. so we do an if/then based on the release we pulled a moment ago.
 
 if [[ $release == "18."* ]]; then
@@ -149,8 +149,6 @@ else
 	
 	install_packages ${packages[@]}
 fi
-
-
 
 ########################################
 #Download, unpack, compile, and install Suricata. make install-full installs the ET ruleset alongside suricata as well.
@@ -231,7 +229,7 @@ echo "sid_msg_version=2" >> pulledpork.tmp
 echo "sid_changelog=/var/log/sid_changes.log" >> pulledpork.tmp
 echo "snort_path=/usr/local/bin/suricata" >> pulledpork.tmp
 echo "config_path=/usr/local/etc/suricata.yaml" >> pulledpork.tmp
-echo "version=0.7.4" >> pulledpork.tmp
+echo "version=0.7.3" >> pulledpork.tmp
 cp pulledpork.tmp pulledpork.conf
 
 print_good "pulledpork.conf generated."
