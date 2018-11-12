@@ -137,49 +137,24 @@ fi
 #A package name changed on Ubuntu 18.04, and we need to account for that. so we do an if/then based on the release we pulled a moment ago.
 
 if [[ $release == "18."* ]]; then
-	#some of the packages we need aren't in the main package repo in 18.04, so we need to modify sources.list to install packages from universe. Before doing that, make a backup of sources.list. If the sources.list.bak file exists, that means the script ran before and somehow bombed out, and we don't want to overwrite a good backup that may contain user customizations
-	print_status "adjusting /etc/apt/sources.list to utilize universe packages.."
-	if [ ! -f /etc/apt/sources.list.bak ]; then
-		cp /etc/apt/sources.list /etc/apt/sources.list.bak &>> $logfile
-		error_check 'Backup of /etc/apt/sources.list'
-	else
-		print_notification '/etc/apt/sources.list.bak already exists.'
-	fi
+	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl rustc cargo python-pip.."
 	
-	#rather than using sed or awk to modify the sources.list file, we use echo -e and clobber the sources.list file, replacing it with our modifications that enable universe packages. If users have non-default package repos enabled, they can restore them from the backup file we create before doing this.
-	echo -e "deb http://archive.ubuntu.com/ubuntu bionic main universe\\ndeb http://archive.ubuntu.com/ubuntu bionic-security main universe\\ndeb http://archive.ubuntu.com/ubuntu bionic-updates main universe" > /etc/apt/sources.list
-	error_check 'Modification of /etc/apt/sources.list'
-	print_notification 'This script assumes a default sources.list, and changes all the default repos from "main" to "main universe". If you added any third party sources, you will need to re-enter those manually from the file /etc/apt/sources.list.bak, into your new /etc/apt/sources.list file.'
-	
-	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl python3-pip.."
-	
-	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl python3-pip );
+	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl rustc cargo python-pip );
 	
 	install_packages ${packages[@]}
-	
 else
-	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libcrypt-ssleay-perl libwww-perl python3-pip.."
+	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libcrypt-ssleay-perl libwww-perl rustc cargo python-pip.."
 	
-	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libcrypt-ssleay-perl libwww-perl python3-pip );
+	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libcrypt-ssleay-perl libwww-perl rustc cargo python-pip );
 	
 	install_packages ${packages[@]}
 fi
 
 ########################################
-#currently there are no rustc or cargo packages available on 18.04 and according to the rust language webpage, the language is subject to rapid change. So, we're going to install rustc and cargo through the rust-init shell script, instead of relying on the package manager.
-print_status "Installing rust via rust-init.."
-curl https://sh.rustup.rs -sSf | sh -s -- -y  &>> $logfile
-error_check 'Install of rustc and cargo'
-
-#per the rust-init script, in order to actually use rust, We have to add Cargo to the PATH variable.
-source /root/.cargo/env
-error_check 'Adding Cargo bin directory to PATH variable'
-
-########################################
 #using pip to install suricata-update, and pyyaml, which suricata 4.1.0+ needs in order to run make install-full now.
 
 print_status "Installing pyyaml, and suricata-update.."
-pip3 install --upgrade pyyaml suricata-update &>> $logfile
+pip install --upgrade pyyaml suricata-update &>> $logfile
 error_check 'Install of pyyaml and suricata-update'
 
 ########################################
@@ -198,7 +173,7 @@ cd $suricata_ver
 
 print_status "configuring suricata, making and installing. This will take a moment or two."
 
-./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
+./configure &>> $logfile
 error_check 'Configure Suricata'
 
 make &>> $logfile

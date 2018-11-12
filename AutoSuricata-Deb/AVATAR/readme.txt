@@ -18,6 +18,24 @@ Thanks,
 
 da_667
 
+11-12-18
+
+Ubuntu 18.04 users:
+-apparently, when I tested, I didn't test things well enough. Ran into a problem where users who installed ubuntu 18.04.1 server from ISO (as opposed to doing do-release-upgrade to 18.04.1 from ubuntu 16.04.x) have a different /etc/apt/sources.list and are unable to install all of the requisite packages. Fixed this by:
+--making a backup of /etc/apt/sources.list in case users have custom repos they enabled
+--blowing away the existing sources.list and replacing with with the default repos from a fresh ubuntu 18.04 install with the "universe" repo installed in addition to the "main" repo
+--if the backup file exists, we assume its due to a failed script run and do NOT over write it (e.g. if /etc/apt/sources.list.bak exists, we do NOT overwrite it)
+--advise the user if they have custom repos configured for their apt sources.list file, to restore them from the backup file we made -- /etc/apt/sources.list.bak
+-noticed that in spite of having the libraries for a bunch of enhanced features (e.g. hiredis, geoip, and lua support), that suricata was compiling without support for any of these features.
+- change the "./configure" portion of the installer to enable support for extra features. Suricata is now compiled with support for:
+--rust
+--geoip
+--hiredis
+--lua
+--liblz4
+--liblzma
+-decided that since rust is a programming language that is subject to constant updating, that using rust-init to install rustc and cargo is probably for the best, since Linux distro packages tend to lag behind. Both 18.04 and 16.04 users install rustc and cargo via rust-init now.
+
 11-09-18
 -Suricata 4.1.0 came out, and with it, rust has become a dominant force in the suricata development community.
 -re-worked the dependencies that get installed, per the readthedocs documentation. Recommended dependencies, including rust dependencies are now installed.
