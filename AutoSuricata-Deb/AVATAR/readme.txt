@@ -18,6 +18,15 @@ Thanks,
 
 da_667
 
+4-26-19
+
+-Decided that it was time to stop installing pulledpork. Suricata has the suricata-update rule manager, and not only that, its included with the install. And is officially supported.
+-Discovered that at some point between now, and the last version of this script, that the suricata project has decided that suricata rules live elsewhere when you run make install-full than t/usr/local/etc/suricata/rules. Fixed this by running suricata -update -D /usr/local/etc/suricata
+-Additionally, while doing this update, figured out that some rules that are enabled by default rely on some of the protocol-event.rules files that are shipped in the suricata source tarball. If these rules are NOT available, whenever you attempt to test your suricata config, you will get several warnings about rules that check for certain flowbits to be set, but those rules not being available. These rules do NOT get downloaded with suricata-update for reasons entirely beyond me, so to fix THAT issue:
+-the suricata source tarball is now downloaded to /usr/src
+-the protocol-event.rules (e.g. tls-events, http-events, etc.) are copied over to /usr/local/etc/suricata/rules
+-suricata-update is ran with the --no-merge flag so you can see what rule categories are enabled and have more granular control of your rules.
+
 11-12-18
 
 Ubuntu 18.04 users:

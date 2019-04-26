@@ -1,6 +1,6 @@
 #!/bin/bash
 #Autosuricata install script
-#Tested on Ubuntu 16.04 and 18.04
+#Tested on Ubuntu 16.04.1
 #But in theory, /should/ work for deb-based distros.
 
 #Functions, functions everywhere.
@@ -168,7 +168,6 @@ fi
 ########################################
 #currently there are no rustc or cargo packages available on 18.04 and according to the rust language webpage, the language is subject to rapid change. So, we're going to install rustc and cargo through the rust-init shell script, instead of relying on the package manager.
 print_status "Installing rust via rust-init.."
-cd /usr/src
 curl https://sh.rustup.rs -sSf | sh -s -- -y  &>> $logfile
 error_check 'Install of rustc and cargo'
 
@@ -193,16 +192,9 @@ error_check 'Download of Suricata'
 tar -xzvf suricata-current.tar.gz &>> $logfile
 error_check 'Untar of Suricata'
 
-suricata_ver=`ls -1 | egrep "suricata-[0-9]" | head -1`
+suricata_ver=`ls -1 | egrep "suricata-[0-9]"`
 
 cd $suricata_ver
-
-#suricata-update is included in suricata, but before we can actually make use of it, we have to make a slight modification
-#see this bug: https://github.com/vagishagupta23/suricata-update/commit/18fe7a12204fe4e7053c4709b483e0518272a168
-
-print_status "fixing suricata-update main.py.."
-
-sed -i 's/added.append(rule.id)/added.append(key)/' /usr/src/$suricata_ver/suricata-update/suricata/update/main.py
 
 print_status "configuring suricata, making and installing. This will take a moment or two."
 
@@ -226,18 +218,60 @@ error_check 'Installation of Suricata (1 of 2)'
 
 print_notification "Suricata has been installed to: /usr/local/bin/suricata"
 print_notification "YAML located at: /usr/local/etc/suricata/suricata.yaml"
-#apparently rules no longer end up in /usr/local/etc/suricata/rules, so this is how I'm choosing to fix that.
-#Create the directory, and place all of the protocol-event.rules (e.g. http-event.rules) into /usr/local/etc/suricata/rules
-#Why: while suricata-update is a thing, the protocol-event.rules files are NOT included in the ET-nogpl ruleset, but are included with the suricata source tarball
-#This means they need to be manually copied out of the tarball if we're going to use them and/or the --no-merge rule option with suricata-update
-dir_check /usr/local/etc/suricata/rules
-cp /usr/src/$suricata_ver/rules/*-events.rules /usr/local/etc/suricata/rules
 print_notification "Rules located at: /usr/local/etc/suricata/rules/"
 
 print_status "Changing default log directory to /var/log/suricata.."
 sed -i "s#default-log-dir: /usr/local/var/log/suricata/#default-log-dir: /var/log/suricata/#" /usr/local/etc/suricata/suricata.yaml
 
 dir_check /var/log/suricata
+
+########################################
+
+#Pulled Pork. Download, unpack, and configure.
+
+cd /usr/src
+
+if [ -d /usr/src/pulledpork ]; then
+	rm -rf /usr/src/pulledpork
+fi
+
+print_status "Acquiring Pulled Pork.."
+
+git clone https://github.com/shirkdog/pulledpork.git &>> $logfile
+error_check 'Download of pulledpork'
+
+print_good "Pulledpork successfully installed to /usr/src."
+
+print_status "Generating pulledpork.conf.."
+
+cd pulledpork/etc
+
+#Create a copy of the original conf file (in case the user needs it). If the user supplied an oink code, we can assume that they want to use the ET PRO ruleset. Otherwise, we assume they want to use the free rules.
+cp pulledpork.conf pulledpork.conf.orig
+
+if [ -z "$o_code" ]; then
+	echo "rule_url=https://rules.emergingthreats.net/open-nogpl/suricata/|emerging.rules.tar.gz|open-nogpl" >> pulledpork.tmp
+else
+	#I'm not able to validate that this is a correct rule_url at this time
+	#I don't have an ETPRO subscription.
+	echo "rule_url=https://rules.emergingthreatspro.com/|etpro.rules.tar.gz|$o_code" > pulledpork.tmp
+fi
+
+
+echo "ignore=deleted.rules,experimental.rules,local.rules" >> pulledpork.tmp
+echo "temp_path=/tmp" >> pulledpork.tmp
+echo "out_path=/usr/local/etc/suricata/rules/" >> pulledpork.tmp
+echo "local_rules=/usr/local/etc/suricata/rules/local.rules" >> pulledpork.tmp
+echo "sid_msg=/usr/local/etc/suricata/rules/sid-msg.map" >> pulledpork.tmp
+echo "sid_msg_version=2" >> pulledpork.tmp
+echo "sid_changelog=/var/log/sid_changes.log" >> pulledpork.tmp
+echo "snort_path=/usr/local/bin/suricata" >> pulledpork.tmp
+echo "config_path=/usr/local/etc/suricata.yaml" >> pulledpork.tmp
+echo "version=0.7.4" >> pulledpork.tmp
+cp pulledpork.tmp pulledpork.conf
+
+print_good "pulledpork.conf generated."
+print_notification "pulledpork has NOT been ran, because make install-full installs the et-nogpl ruleset by default."
 
 ########################################
 
@@ -332,26 +366,9 @@ fi
 
 ########################################
 
-#We don't need pulledpork anymore! suricata-update is a thing and its installed by default.
-#We will run suricata-update -D /usr/local/etc/suricata --no-merge
-
-print_status "Running suricata-update.."
-
-suricata-update -D /usr/local/etc/suricata --no-merge &>> $logfile
-error_check 'suricata-update'
-
-#we have to make a final change to suricata-yaml to enable the emerging-info ruleset -- there are a set of rules here that enable flowbits that some other enabled rules are reliant on. Why its the default for this category to be disabled is beyond me, but we're gonna fix it.
-#see also: https://marc.info/?l=oisf-users&m=155181408506482&w=2
-
-print_status "enabling emerging-info.rules to remove SC_WARN_FLOWBIT messages.."
-sed -i 's/# - emerging-info.rules/ - emerging-info.rules/' /usr/local/etc/suricata/suricata.yaml
-
-########################################
-
 print_status "Rebooting now.."
 init 6
-print_notification "The log file for autosuricata is located at: $logfile"
-print_notification "Wanna update your rules? run suricata-update -D /usr/local/etc/suricata --no-merge"
+print_notification "The log file for autosuricata is located at: $logfile" 
 print_good "We're all done here. Have a nice day."
 
 exit 0
