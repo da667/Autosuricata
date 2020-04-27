@@ -1,6 +1,6 @@
 #!/bin/bash
 #Autosuricata install script
-#Tested on Ubuntu 18.04 and 20.04
+#Tested on Ubuntu 16.04 and 18.04
 #But in theory, /should/ work for deb-based distros.
 
 #Functions, functions everywhere.
@@ -124,16 +124,16 @@ error_check 'System updates'
 
 print_status "OS Version Check.."
 release=`lsb_release -r|awk '{print $2}'`
-if [[ $release == "18."* || "20."* ]]; then
+if [[ $release == "16."* || "18."* ]]; then
 	print_good "OS is Ubuntu. Good to go."
 else
-    print_notification "This is not Ubuntu 18.x or 20.x, this script has NOT been tested on other platforms."
+    print_notification "This is not Ubuntu 16.x or 18.x, this script has NOT been tested on other platforms."
 	print_notification "You continue at your own risk!(Please report your successes or failures!)"
 fi
 
 ########################################
 
-#These packages are required at a minimum to build suricata + its component libraries.
+#These packages are required at a minimum to build suricata + its component libraries. The perl requirements are for pulledpork.pl
 #A package name changed on Ubuntu 18.04, and we need to account for that. so we do an if/then based on the release we pulled a moment ago.
 
 if [[ $release == "18."* ]]; then
@@ -151,17 +151,16 @@ if [[ $release == "18."* ]]; then
 	error_check 'Modification of /etc/apt/sources.list'
 	print_notification 'This script assumes a default sources.list, and changes all the default repos from "main" to "main universe". If you added any third party sources, you will need to re-enter those manually from the file /etc/apt/sources.list.bak, into your new /etc/apt/sources.list file.'
 	
-	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip.."
+	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl python3-pip.."
 	
-	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip );
+	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl python3-pip );
 	
 	install_packages ${packages[@]}
 	
 else
-	#20.04 has these packages available by default, so thats neat.
-	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip.."
+	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libcrypt-ssleay-perl libwww-perl python3-pip.."
 	
-	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip );
+	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libcrypt-ssleay-perl libwww-perl python3-pip );
 	
 	install_packages ${packages[@]}
 fi
@@ -198,7 +197,14 @@ suricata_ver=`ls -1 | egrep "suricata-[0-9]" | head -1`
 
 cd $suricata_ver
 
-print_status "configuring suricata, making and installing. This will take a moment or two.."
+#suricata-update is included in suricata, but before we can actually make use of it, we have to make a slight modification
+#see this bug: https://github.com/vagishagupta23/suricata-update/commit/18fe7a12204fe4e7053c4709b483e0518272a168
+
+print_status "fixing suricata-update main.py.."
+
+sed -i 's/added.append(rule.id)/added.append(key)/' /usr/src/$suricata_ver/suricata-update/suricata/update/main.py
+
+print_status "configuring suricata, making and installing. This will take a moment or two."
 
 ./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
 error_check 'Configure Suricata'
@@ -206,43 +212,32 @@ error_check 'Configure Suricata'
 make &>> $logfile
 error_check 'Make Suricata'
 
-make install-full &>> $logfile
-error_check 'Installation of Suricata'
+#due to changes in how Suricata make install-full actually works, I have to run make install, ldconfig, then make install-full, in that order for things to work. This is terrible. make install-full /should/ run ldconfig before attempting to run suricata-update, but it doesn't, so suricata doesn't run, because it doesn't know where libhtp is. This is my work-around.
 
-#need to run ldconfig, because in spite of make install-full successfully running now, suricata will fail to run on next boot because it still doesn't know that libhtp.so exists.
-ldconfig &>> $logfile
+make install &>> $logfile
+error_check 'Installation of Suricata (1 of 2)'
+
+ldconfig
+
+make install-full &>> $logfile
+error_check 'Installation of Suricata (1 of 2)'
+
+
 
 print_notification "Suricata has been installed to: /usr/local/bin/suricata"
 print_notification "YAML located at: /usr/local/etc/suricata/suricata.yaml"
-print_notification "Rules located at: /usr/local/var/lib/suricata/rules"
+#apparently rules no longer end up in /usr/local/etc/suricata/rules, so this is how I'm choosing to fix that.
+#Create the directory, and place all of the protocol-event.rules (e.g. http-event.rules) into /usr/local/etc/suricata/rules
+#Why: while suricata-update is a thing, the protocol-event.rules files are NOT included in the ET-nogpl ruleset, but are included with the suricata source tarball
+#This means they need to be manually copied out of the tarball if we're going to use them and/or the --no-merge rule option with suricata-update
+dir_check /usr/local/etc/suricata/rules
+cp /usr/src/$suricata_ver/rules/*-events.rules /usr/local/etc/suricata/rules
+print_notification "Rules located at: /usr/local/etc/suricata/rules/"
 
 print_status "Changing default log directory to /var/log/suricata.."
 sed -i "s#default-log-dir: /usr/local/var/log/suricata/#default-log-dir: /var/log/suricata/#" /usr/local/etc/suricata/suricata.yaml
 
 dir_check /var/log/suricata
-
-print_status "Checking for suricata user and group.."
-
-getent passwd suricata &>> $logfile
-if [ $? -eq 0 ]; then
-	print_notification "suricata user exists. Verifying group exists.."
-	id -g suricata &>> $logfile
-	if [ $? -eq 0 ]; then
-		print_notification "suricata group exists."
-	else
-		print_notification "suricata group does not exist. Creating.."
-		groupadd suricata
-		usermod -G suricata suricata
-	fi
-else
-	print_status "Creating suricata user and group.."
-	groupadd suricata
-	useradd -g suricata suricata -s /bin/false	
-fi
-
-print_status "Tightening permissions to /var/log/suricata.."
-chmod 770 /var/log/suricata
-chown suricata:suricata /var/log/suricata
 
 ########################################
 
@@ -283,32 +278,30 @@ print_good "default afpacket configuration commented out"
 
 ########################################
 
-#Suricata systemd service script, suricatad installation/configuration.
+#Suricata init script, suricatad installation/configuration.
 
-print_status "Setting up suricatad systemd service script.."
+print_status "Setting up suricatad init script.."
 
 cd "$execdir"
-if [ -f /etc/systemd/system/suricatad.service ]; then
-	print_notification "Suricata systemd service script already installed."
+if [ -f /etc/init.d/suricatad ]; then
+	print_notification "Suricatad init script already installed."
 else
-	if [ ! -f "$execdir"/suricatad.service ]; then
-		print_error" Unable to find $execdir/suricatad.service. Please ensure the suricatad.service file is there and try again."
+	if [ ! -f "$execdir"/suricatad ]; then
+		print_error" Unable to find $execdir/suricatad. Please ensure suricatad file is there and try again."
 		exit 1
 	else
-		print_good "Found suricatad systemd service script. Configuring.."
+		print_good "Found suricatad init script."
 	fi
 	
-	cp suricatad.service suricatad_2 &>> $logfile
-	sed -i "s#suricata_iface1#$suricata_iface_1#g" suricatad_2
-	sed -i "s#suricata_iface2#$suricata_iface_2#g" suricatad_2
-	cp suricatad_2 /etc/systemd/system/suricatad.service &>> $logfile
-	chown root:root /etc/systemd/system/suricatad.service &>> $logfile
-	chmod 600 /etc/systemd/system/suricatad.service &>> $logfile
-	systemctl daemon-reload &>> $logfile
-	error_check 'suricatad.service installation'
-	print_notification "Location: /etc/systemd/system/suricatad.service"
-	systemctl enable suricatad.service &>> $logfile
-	error_check 'suricatad.service enable'	
+	cp suricatad suricatad_2 &>> $logfile
+	sed -i "s#suricata_iface1#$suricata_iface_1#g" suricatad_2 &>> $logfile
+	sed -i "s#suricata_iface2#$suricata_iface_2#g" suricatad_2 &>> $logfile
+	cp suricatad_2 /etc/init.d/suricatad &>> $logfile
+	chown root:root /etc/init.d/suricatad &>> $logfile
+	chmod 700 /etc/init.d/suricatad &>> $logfile
+	update-rc.d suricatad defaults &>> $logfile
+	error_check 'Init Script installation'
+	print_notification "Init script located in /etc/init.d/suricatad"
 	rm -rf suricatad_2 &>> $logfile
 fi
 
@@ -338,17 +331,20 @@ else
 fi
 
 ########################################
-#We need to set permissions of everything in these directories to the suricata user/group, otherwise the daemon can't read any config files, rule files, or lay down control sockets. We tell the users that they may need to change file permissions for the config files and/or rules after runnig suricata-update
 
-print_status "modifying permissions to allow the suricata user and group access to rules, config files, etc."
+#We don't need pulledpork anymore! suricata-update is a thing and its installed by default.
+#We will run suricata-update -D /usr/local/etc/suricata --no-merge
 
-dir_check /usr/local/var/run/suricata
+print_status "Running suricata-update.."
 
-chown -R suricata:suricata /usr/local/var/lib/suricata
-error_check 'suricata user ownership of /usr/local/var/lib/suricata'
-chown -R suricata:suricata /usr/local/etc/suricata
-error_check 'suricata user ownership of /usr/local/etc/suricata'
-chown -R suricata:suricata /usr/local/var/run/suricata
+suricata-update -D /usr/local/etc/suricata --no-merge &>> $logfile
+error_check 'suricata-update'
+
+#we have to make a final change to suricata-yaml to enable the emerging-info ruleset -- there are a set of rules here that enable flowbits that some other enabled rules are reliant on. Why its the default for this category to be disabled is beyond me, but we're gonna fix it.
+#see also: https://marc.info/?l=oisf-users&m=155181408506482&w=2
+
+print_status "enabling emerging-info.rules to remove SC_WARN_FLOWBIT messages.."
+sed -i 's/# - emerging-info.rules/ - emerging-info.rules/' /usr/local/etc/suricata/suricata.yaml
 
 ########################################
 
@@ -356,7 +352,6 @@ print_status "Rebooting now.."
 init 6
 print_notification "The log file for autosuricata is located at: $logfile"
 print_notification "Wanna update your rules? run suricata-update -D /usr/local/etc/suricata --no-merge"
-print_notification "You want also want to run chown -R suricata:suricata /usr/local/etc/suricata, AND chown -R suricata:suricata /usr/local/var/lib/suricata/ AFTER doing this"
 print_good "We're all done here. Have a nice day."
 
 exit 0

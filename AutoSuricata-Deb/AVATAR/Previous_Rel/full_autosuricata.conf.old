@@ -18,3 +18,12 @@ suricata_iface_1=eth1
 # suricata_iface_2=eth2
 #default setting: suricata_iface_2=eth2
 suricata_iface_2=eth2
+
+
+##o_code##
+# This setting is the oink code that will be used by pulled pork to download your rules.
+# You only need to fill out this option if you are using the Emerging Threats pro rule offerings. THIS SETTING IS OPTIONAL
+# Example:
+# o_code=2426170067b2e110c1f3fdee444118fcc15180f0
+# the above is not a valid oink code; do not use it.
+o_code=

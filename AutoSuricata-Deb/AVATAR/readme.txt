@@ -4,8 +4,8 @@ This is a special release of autosuricata meant to be used as a part of Project:
 -Downloads suricata-currrent and compiles it with the make install-full option. Suricata is installed to /usr/local/bin/suricata, while suricata's supporting files are installed to /usr/local/etc/suricata
 -Installs suricata-update for rule management
 -Configures suricata for inline mode operation via af-packet bridging
--Installes the "suricatad" init script for service persistence
--Very stripped-down: This installer does NOT install barnyard2, or include any options to install an interface of any sort. This installs pulledpork, and Suricata with some persistence, and that's it.
+-Installs the "suricatad.service" systemd service script for service persistence
+-Very stripped-down: This installer does NOT install barnyard2, or include any options to install an interface of any sort. This installs Suricata with some persistence, suricata-update, and that's it.
 -Inline mode operation: This installer requires a minimum of 3 network interfaces to work properly. Two interfaces will be placed into inline mode via the AFPACKET DAQ. ARP will be disabled on these interfaces, meaning that your system will NOT respond to any traffic sent to these interfaces.
 
 This installer, and its supporting files are meant to be consumed with PROJECT:AVATAR, my massive virtual lab book. Particularly, the chapter entitled "IDS/IPS" installation. All the instructions you should need should be included in the book.
@@ -17,10 +17,31 @@ Thanks,
 
 da_667
 
+-Patch Notes-
+
+4-27-20
+
+-Ubuntu 20.04 has officially been released. In preparation for a new Building Virtual Machine Labs release, This script has been updated.
+--Support for Ubuntu 16.04 has been removed from this release. If you have a need to install suricata on Ubuntu 16.04, the previous releases directory should have what you need. Dont sweat it!
+-Tested out a couple of fixs that the OISF/Suricata dev team implemented, including a bug affecting suricata-update, and a bug affecting make install-full. Hypothetically, no longer having to work around these problems means that the installation will go a little bit faster.
+-Discovered that suricata requires libmaxminddb-dev, so added that as an install requirement. Should fix the suricata configure choking and telling people that the library isn't there.
+-There have been some changes to where and how the suricata.yaml handles rules by default.
+--Rules used to be, by default separated out into their individual categories. Apparently now, the default suricata.yaml config is to merge everything into suricata.rules.
+--I'm going to deal with this for now, and maybe include some lessons on rule management using either suricata-update, or maybe scirius for rule management.
+--rules are now located in /usr/local/var/lib/suricata/rules
+-Finally made the switch from an init script to a full-on systemd service file. After some trial and error, I think I have a service script that properly kills the suricata process and ensures that the pidfile isn't present before trying to run a new suricata process (resulting in "zombie" processes, and/or failing to start suricata due to stale pid files being present)
+-Created a suricata user and group and configured dropping the suricata daemon's privs to the suricata user, instead of letting the service run as root, in accordance to best practices for system services
+-Performed some script cleanup. Stuff like removing references to pulledpork in the main script and also in the full_autosuricata.conf file, etc.
+-Be aware that since you'll likely be running suricata-update as a user that is NOT the suricata user, suricata will likely not be able to read any new files suricata-update creates in /usr/local/var/lib/suricata or /usr/local/etc/suricata. If you check /var/log/suricata/suricata.log and its vomiting about not being able to read the suricata.rules, classification.config and/or reference config OR, you see it complaining that it couldn't create a control socket due to insufficient permissions you'll want to run the following commands:
+--chown -R suricata:suricata /usr/local/var/lib/suricata
+--chown -R suricata:suricata /usr/local/etc/suricata
+--chown -R suricata:suricata /usr/local/var/run/suricata
+--Then either reboot the system, or restart the suricatad service. Pray that it was just a file permissions problem.
+
 4-26-19
 
 -Decided that it was time to stop installing pulledpork. Suricata has the suricata-update rule manager, and not only that, its included with the install. And is officially supported.
--Discovered that at some point between now, and the last version of this script, that the suricata project has decided that suricata rules live elsewhere when you run make install-full than t/usr/local/etc/suricata/rules. Fixed this by running suricata -update -D /usr/local/etc/suricata
+-Discovered that at some point between now, and the last version of this script, that the suricata project has decided that suricata rules live elsewhere when you run make install-full than /usr/local/etc/suricata/rules. Fixed this by running suricata-update -D /usr/local/etc/suricata
 -Additionally, while doing this update, figured out that some rules that are enabled by default rely on some of the protocol-event.rules files that are shipped in the suricata source tarball. If these rules are NOT available, whenever you attempt to test your suricata config, you will get several warnings about rules that check for certain flowbits to be set, but those rules not being available. These rules do NOT get downloaded with suricata-update for reasons entirely beyond me, so to fix THAT issue:
 -the suricata source tarball is now downloaded to /usr/src
 -the protocol-event.rules (e.g. tls-events, http-events, etc.) are copied over to /usr/local/etc/suricata/rules
