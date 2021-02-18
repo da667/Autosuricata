@@ -3,21 +3,22 @@ Description=Suricata Daemon
 After=syslog.target network-online.target
 
 [Service]
-Type=simple
-PIDFile=/usr/local/var/run/suricata.pid
+#Type=simple
+#PIDFile=/usr/local/var/run/suricata.pid
 
 ProtectHome=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
 
-ExecStartPre=/usr/sbin/ip link set up promisc on arp off multicast off dev suricata_iface1
-ExecStartPre=/usr/sbin/ip link set up promisc on arp off multicast off dev suricata_iface2
-ExecStartPre=/usr/sbin/ethtool -K suricata_iface1 rx off tx off gro off lro off
-ExecStartPre=/usr/sbin/ethtool -K suricata_iface2 rx off tx off gro off lro off
-ExecStartPre=-/usr/bin/rm /usr/local/var/run/suricata.pid
+ExecStartPre=/sbin/ip link set up promisc on arp off multicast off dev ens160
+ExecStartPre=/sbin/ip link set up promisc on arp off multicast off dev ens192
+ExecStartPre=/sbin/ethtool -K ens160 rx off tx off gro off lro off
+ExecStartPre=/sbin/ethtool -K ens192 rx off tx off gro off lro off
+ExecStartPre=/bin/rm -f /usr/local/var/run/suricata.pid
 
-ExecStart=/usr/local/bin/suricata -D -c /usr/local/etc/suricata/suricata.yaml --af-packet --user=suricata
+ExecStart=/usr/local/bin/suricata -c /usr/local/etc/suricata/suricata.yaml --af-packet --user=suricata --pidfile=/usr/local/var/run/suricata.pid
+ExecReload=/bin/kill -USR2 $MAINPID
 
 Restart=on-failure
 RestartSec=60s
