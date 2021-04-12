@@ -3,7 +3,7 @@ Description=Suricata Daemon
 After=syslog.target network-online.target
 
 [Service]
-Type=simple
+Type=forking
 PIDFile=/usr/local/var/run/suricata.pid
 
 ProtectHome=true
@@ -15,8 +15,6 @@ ExecStartPre=/usr/sbin/ip link set up promisc on arp off multicast off dev suric
 ExecStartPre=/usr/sbin/ip link set up promisc on arp off multicast off dev suricata_iface2
 ExecStartPre=/usr/sbin/ethtool -K suricata_iface1 rx off tx off gro off lro off
 ExecStartPre=/usr/sbin/ethtool -K suricata_iface2 rx off tx off gro off lro off
-ExecStartPre=-/usr/bin/rm /usr/local/var/run/suricata.pid
-
 ExecStart=/usr/local/bin/suricata -D -c /usr/local/etc/suricata/suricata.yaml --af-packet --user=suricata
 
 Restart=on-failure

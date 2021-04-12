@@ -19,6 +19,9 @@ da_667
 
 -Patch Notes-
 
+4-11-21
+-Fixed a bug in suricatad.service. Changed the service type from simple to forking in order for the PIDFile directive to handle tracking the pidfile, and removing stale pid files.
+
 4-27-20
 
 -Ubuntu 20.04 has officially been released. In preparation for a new Building Virtual Machine Labs release, This script has been updated.
