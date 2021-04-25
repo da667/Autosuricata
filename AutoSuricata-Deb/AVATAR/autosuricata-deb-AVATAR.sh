@@ -241,7 +241,7 @@ else
 fi
 
 print_status "Tightening permissions to /var/log/suricata.."
-chmod 770 /var/log/suricata
+chmod 5775 /var/log/suricata
 chown suricata:suricata /var/log/suricata
 
 ########################################

@@ -18,6 +18,8 @@ Thanks,
 da_667
 
 -Patch Notes-
+4-25-21
+-Fixed a permissions problem with the directory, /var/log/suricata. The file permissions have changed from 770 to 5775. Why? The splunk universal forwarder needs to be able to traverse the directory to read the eve.json file, and the splunk user is considered "world" and so with 770 permissions has no rights to look at anything in the directory, even though the files contained within are configured with 644 permissions.
 
 4-11-21
 -Fixed a bug in suricatad.service. Changed the service type from simple to forking in order for the PIDFile directive to handle tracking the pidfile, and removing stale pid files.
