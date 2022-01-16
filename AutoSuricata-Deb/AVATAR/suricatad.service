@@ -15,7 +15,7 @@ ExecStartPre=/usr/sbin/ip link set up promisc on arp off multicast off dev suric
 ExecStartPre=/usr/sbin/ip link set up promisc on arp off multicast off dev suricata_iface2
 ExecStartPre=/usr/sbin/ethtool -K suricata_iface1 rx off tx off gro off lro off
 ExecStartPre=/usr/sbin/ethtool -K suricata_iface2 rx off tx off gro off lro off
-ExecStart=/usr/local/bin/suricata -D -c /usr/local/etc/suricata/suricata.yaml --af-packet --user=suricata
+ExecStart=/usr/local/bin/suricata -D -c /usr/local/etc/suricata/suricata.yaml -k none --af-packet --user=suricata
 
 Restart=on-failure
 RestartSec=60s

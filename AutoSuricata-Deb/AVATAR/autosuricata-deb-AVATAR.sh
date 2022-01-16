@@ -151,17 +151,17 @@ if [[ $release == "18."* ]]; then
 	error_check 'Modification of /etc/apt/sources.list'
 	print_notification 'This script assumes a default sources.list, and changes all the default repos from "main" to "main universe". If you added any third party sources, you will need to re-enter those manually from the file /etc/apt/sources.list.bak, into your new /etc/apt/sources.list file.'
 	
-	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip.."
+	print_status "Installing base packages: jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev.."
 	
-	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip );
+	declare -a packages=( jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 	
 else
 	#20.04 has these packages available by default, so thats neat.
-	print_status "Installing base packages: libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip.."
+	print_status "Installing base packages: jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev.."
 	
-	declare -a packages=( libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip );
+	declare -a packages=( jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 fi
@@ -176,6 +176,12 @@ error_check 'Install of rustc and cargo'
 #per the rust-init script, in order to actually use rust, We have to add Cargo to the PATH variable.
 source /root/.cargo/env
 error_check 'Adding Cargo bin directory to PATH variable'
+
+########################################
+#Suricata docs recommend installing rust's cbindgen crate, so we're gonna do that.
+print_status "Installing cbindgen.."
+cargo install --force --debug --version 0.14.1 cbindgen &>> $logfile
+error_check 'Installation of cbindgen'
 
 ########################################
 #using pip to install suricata-update, and pyyaml, which suricata 4.1.0+ needs in order to run make install-full now.
@@ -200,7 +206,7 @@ cd $suricata_ver
 
 print_status "configuring suricata, making and installing. This will take a moment or two.."
 
-./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
+./configure --enable-lua --enable-geoip --enable-hiredis --enable-http2-decompression &>> $logfile
 error_check 'Configure Suricata'
 
 make &>> $logfile
