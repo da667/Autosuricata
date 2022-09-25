@@ -194,7 +194,7 @@ error_check 'Install of pyyaml and suricata-update'
 #Download, unpack, compile, and install Suricata. make install-full installs the ET ruleset alongside suricata as well.
 print_status "Acquiring and unpacking suricata-current.tar.gz to /usr/src.."
 
-wget http://downloads.suricata-ids.org/suricata-current.tar.gz &>> $logfile
+wget http://www.openinfosecfoundation.org/download/suricata-current.tar.gz &>> $logfile
 error_check 'Download of Suricata'
 
 tar -xzvf suricata-current.tar.gz &>> $logfile

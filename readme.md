@@ -101,6 +101,9 @@ This script is released under the MIT license. There is no warranty for this sof
 A big thanks to @inliniac and the rest of the OISF dev team for being so approachable, and writing good, accessible documentation.
 		
 ## Patch Notes
+ - 9-25-22
+	- Another very minor change to this script:
+	- The domain used for hosting the latest suricata tarball has changed and would result in bombing out when users attempted to download it. This release fixes that issues, pointing to www.openinfosecfoundation.org/download/suricata-current.tar.gz
  - 1-15-22
 	- Hey Hey people! Happy new year. Some very minor changes to this release to enable a couple of extra features:
 		- This script now installs libhyperscan-dev in order to provide Suricata the ability to use hyperscan for pattern matching. Suricata has had support for hyperscan for ages now, and since Autosnort3 uses it to build snort3, I would install and configure hyperscan for use with suricata as well.
