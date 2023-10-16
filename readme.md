@@ -22,7 +22,7 @@ https://suricata.readthedocs.io
 
 These are the specs for the VM I used to test this script. As with most software, the more resources it has available, the better it will perform. Suricata has always been multi-threaded, so more CPU cores is never a bad thing.
 
-**OS Recommendations:** This script has been tested on Ubuntu 20.04 and 18.04. If you want to use another Debian-based distro, be my guest. *However* that is entirely unsupported and untested.
+**OS Recommendations:** This script has been tested on Ubuntu 20.04 and above. If you want to use another Debian-based distro, be my guest. *However* that is entirely unsupported and untested.
 
 **Other Recommendations:** 
 
