@@ -151,7 +151,7 @@ release=`lsb_release -r|awk '{print $2}'`
 
 #These packages are recommended to build suricata to support most of its features. I also included libhyperscan-dev to enable hyperscan support.
 
-if [[ $release == "20."* ]]; then
+if [[ $release == "20."* || "22."* ]]; then
 	print_status "Installing Recommended Packages: autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev.."
 
 	declare -a packages=( autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev );
