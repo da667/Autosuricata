@@ -79,6 +79,28 @@ fi
 }
 
 ########################################
+#This is a nice retry function by sj26 on github.
+#link to original: https://gist.github.com/sj26/88e1c6584397bb7c13bd11108a579746
+# Retry a command up to a specific numer of times until it exits successfully
+function retry 
+{
+	local retries=$1
+	shift
+	local count=0
+	until "$@"; do
+		exit=$?
+		count=$(($count + 1))
+		if [ $count -lt $retries ]; then
+			print_notification "Retry $count/$retries exited $exit, retrying.."
+		else
+			print_error "Retry $count/$retries exited with error code $exit, no more retries left."
+		return $exit
+		fi
+	done
+	return 0
+}
+
+########################################
 ##BEGIN MAIN SCRIPT##
 
 #Pre checks: These are a couple of basic sanity checks the script does before proceeding.
@@ -124,44 +146,22 @@ error_check 'System updates'
 
 print_status "OS Version Check.."
 release=`lsb_release -r|awk '{print $2}'`
-if [[ $release == "18."* || "20."* ]]; then
-	print_good "OS is Ubuntu. Good to go."
-else
-    print_notification "This is not Ubuntu 18.x or 20.x, this script has NOT been tested on other platforms."
-	print_notification "You continue at your own risk!(Please report your successes or failures!)"
-fi
 
 ########################################
 
-#These packages are required at a minimum to build suricata + its component libraries.
-#A package name changed on Ubuntu 18.04, and we need to account for that. so we do an if/then based on the release we pulled a moment ago.
+#These packages are recommended to build suricata to support most of its features. I also included libhyperscan-dev to enable hyperscan support.
 
-if [[ $release == "18."* ]]; then
-	#some of the packages we need aren't in the main package repo in 18.04, so we need to modify sources.list to install packages from universe. Before doing that, make a backup of sources.list. If the sources.list.bak file exists, that means the script ran before and somehow bombed out, and we don't want to overwrite a good backup that may contain user customizations
-	print_status "adjusting /etc/apt/sources.list to utilize universe packages.."
-	if [ ! -f /etc/apt/sources.list.bak ]; then
-		cp /etc/apt/sources.list /etc/apt/sources.list.bak &>> $logfile
-		error_check 'Backup of /etc/apt/sources.list'
-	else
-		print_notification '/etc/apt/sources.list.bak already exists.'
-	fi
-	
-	#rather than using sed or awk to modify the sources.list file, we use echo -e and clobber the sources.list file, replacing it with our modifications that enable universe packages. If users have non-default package repos enabled, they can restore them from the backup file we create before doing this.
-	echo -e "deb http://archive.ubuntu.com/ubuntu bionic main universe\\ndeb http://archive.ubuntu.com/ubuntu bionic-security main universe\\ndeb http://archive.ubuntu.com/ubuntu bionic-updates main universe" > /etc/apt/sources.list
-	error_check 'Modification of /etc/apt/sources.list'
-	print_notification 'This script assumes a default sources.list, and changes all the default repos from "main" to "main universe". If you added any third party sources, you will need to re-enter those manually from the file /etc/apt/sources.list.bak, into your new /etc/apt/sources.list file.'
-	
-	print_status "Installing base packages: jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev.."
-	
-	declare -a packages=( jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev );
+if [[ $release == "20."* ]]; then
+	print_status "Installing Recommended Packages: autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev.."
+
+	declare -a packages=( autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
-	
 else
-	#20.04 has these packages available by default, so thats neat.
-	print_status "Installing base packages: jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev.."
-	
-	declare -a packages=( jq libhyperscan-dev libpcre3 libpcre3-dbg libpcre3-dev build-essential autoconf automake libtool libpcap-dev libnet1-dev libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 make liblz4-dev liblzma-dev libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev libhiredis-dev libevent-dev libarchive-tar-perl libnet-ssleay-perl libwww-perl libmaxminddb-dev python3-pip zlib1g zlib1g-dev );
+	print_notification "This script has only been tested with Ubuntu 20.04+. It may work on other .deb-based distros, it may not. YMMV. Please report failures as github issues."
+	print_status "Attempting to Install Recommended Packages: autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev  libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev.."
+
+	declare -a packages=( autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 fi
@@ -180,21 +180,47 @@ error_check 'Adding Cargo bin directory to PATH variable'
 ########################################
 #Suricata docs recommend installing rust's cbindgen crate, so we're gonna do that.
 print_status "Installing cbindgen.."
-cargo install --force --debug --version 0.14.1 cbindgen &>> $logfile
+cargo install --force --debug cbindgen &>> $logfile
 error_check 'Installation of cbindgen'
 
 ########################################
 #using pip to install suricata-update, and pyyaml, which suricata 4.1.0+ needs in order to run make install-full now.
+#installing pyelftools in order to support dpdk.
 
 print_status "Installing pyyaml, and suricata-update.."
-pip3 install --upgrade pyyaml suricata-update &>> $logfile
+pip3 install --upgrade pyelftools pyyaml suricata-update &>> $logfile
 error_check 'Install of pyyaml and suricata-update'
+
+########################################
+#If users want dpdk support, then we need to acquire dpdk sources and build them. The builds for meson and ninja _shouldn't_ fail, but if they do, exit the script.
+if [[ $dpdk_support == "yes" ]]; then
+
+	print_status 'Downloading and installing DPDK..'
+	retry 3 wget http://fast.dpdk.org/rel/dpdk-22.11.3.tar.xz &>> $logfile
+	error_check 'Download of DPDK sources'
+	print_notification 'If this task failed, please check your network connection and/or submit a github issue for me to check for a new LTS build'
+	
+	tar -xzvf dpdk-22.11.3.tar.xz &>> $logfile
+	error_check 'Untar of DPDK sources'
+	
+	cd dpdk-stable-22.11.3 &>> $logfile
+	
+	print_status 'Attempting meson and ninja builts for DPDK sources..'
+	print_notification 'If either of these tasks fail, and the autosuricata_install.log is NOT helpful, consider change the dpdk_support variable in full_autosuricata.conf to dpdk_support=no'
+	
+	meson build &>> $logfile
+	error_check 'DPDK meson build'
+	
+	ninja -C build &>> $logfile
+	error_check 'DPDK ninja build'
+	cd /usr/src
+fi
 
 ########################################
 #Download, unpack, compile, and install Suricata. make install-full installs the ET ruleset alongside suricata as well.
 print_status "Acquiring and unpacking suricata-current.tar.gz to /usr/src.."
 
-wget http://www.openinfosecfoundation.org/download/suricata-current.tar.gz &>> $logfile
+retry 3 wget http://www.openinfosecfoundation.org/download/suricata-current.tar.gz &>> $logfile
 error_check 'Download of Suricata'
 
 tar -xzvf suricata-current.tar.gz &>> $logfile
@@ -204,10 +230,25 @@ suricata_ver=`ls -1 | egrep "suricata-[0-9]" | head -1`
 
 cd $suricata_ver
 
-print_status "configuring suricata, making and installing. This will take a moment or two.."
+print_status "Configuring suricata, making and installing. This will take a moment or two.."
 
-./configure --enable-lua --enable-geoip --enable-hiredis --enable-http2-decompression &>> $logfile
-error_check 'Configure Suricata'
+if [[ $dpdk_support == "yes" ]]; then
+	print_status 'Attempting build with DPDK support..'
+	./configure --enable-lua --enable-geoip --enable-hiredis --enable-dpdk &>> $logfile
+	
+	#Fall back to compiling without DPDK if the configure command failed.
+	if [ $? -eq 0 ]; then
+		print_good "Configure Suricata with DPDK support Successful."
+	else
+		print_notification "Configure with DPDK support failed. Trying again without DPDK support.."
+		./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
+		error_check 'Configure Suricata without DPDK support'
+	fi
+else
+	print_status 'Attempting to configure Suricata without DPDK support..'
+	./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
+	error_check 'Configure Suricata without DPDK support'
+fi
 
 make &>> $logfile
 error_check 'Make Suricata'

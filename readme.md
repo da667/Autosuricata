@@ -101,6 +101,20 @@ This script is released under the MIT license. There is no warranty for this sof
 A big thanks to @inliniac and the rest of the OISF dev team for being so approachable, and writing good, accessible documentation.
 		
 ## Patch Notes
+ - 10-15-23
+	- Long Time no See! Suricata 7.x came out some time ago, and with it, some changes to the package requirements.
+		- Pulled the latest set of recommended installation packages from https://docs.suricata.io/en/latest/install.html (as of mine writing this, "latest" stable is 7.0.1)
+			- If you were getting issues about `libpcre2` being missing, this should fix them.
+		- This wasn't really documented on read the docs, but Suricata 7+ refuses to compile without maxmind geoip libraries, so I added `libmaxminddb-dev` to the list of installed packages.
+		- Made slight alternations to the cargo install of `cbindgen`. This script will now attempt to pull whatever version is the latest available.
+	- Made some changes to enable support for DPDK. To learn more, check out: https://www.dpdk.org/about/
+		- TL;DR: through some arcanery, DPDK allows for faster packet processing in some cases. Depending on whether or not the NIC or network drivers are supported by the project.
+		- Added a `dpdk_support` variable to `full_autosuricata.conf` -- defaults to yes, meaning that the script will try to compile dpdk, and configure suricata with dpdk support. If for some reason compiling dpdk fails, or configuring snort with DPDK support fails:
+			- Check your internet connectivity to confirm its able to download the DPDK stable release. If the download fails due to 404 or other non-connection errors, open a github issue for me to fix it, *please*.
+			- Consider setting the `dpdk_support` variable in `full_autosuricata.conf` variable to no.
+	- HTTP2 support is enabled by default in suricata 7, so `--enable-http2-decompression` shouldn't be a required configure option for compiling Suricata anymore, so I removed it.
+	- Autosnort 3 features a function called `Retry` that I found on github (and credited the creator, of course), that will retry a command a user-defined number of times before bailing. So I included the function in this new release, and used it for pulling down the DPDK LTS build, and the "latest" suricata tarball, for a little bit of script reliability/feature parity.
+	- LTS Support for Ubuntu 18.04 was dropped in Spring of this year, so we've officially dropped support for 18.04 as well -- no more trying to guess the correct name of software packages.
  - 9-25-22
 	- Another very minor change to this script:
 	- The domain used for hosting the latest suricata tarball has changed and would result in bombing out when users attempted to download it. This release fixes that issues, pointing to www.openinfosecfoundation.org/download/suricata-current.tar.gz
