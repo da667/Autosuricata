@@ -205,8 +205,8 @@ if [[ $dpdk_support == "yes" ]]; then
 	
 	cd dpdk-stable-22.11.3 &>> $logfile
 	
-	print_status 'Attempting meson and ninja builts for DPDK sources..'
-	print_notification 'If either of these tasks fail, and the autosuricata_install.log is NOT helpful, consider change the dpdk_support variable in full_autosuricata.conf to dpdk_support=no'
+	print_status 'Attempting meson and ninja builds for DPDK sources..'
+	print_notification 'If either of these tasks fail, and the autosuricata_install.log is NOT helpful, consider changing the dpdk_support variable in full_autosuricata.conf to dpdk_support=no'
 	
 	meson build &>> $logfile
 	error_check 'DPDK meson build'
