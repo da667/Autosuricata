@@ -211,6 +211,8 @@ if [[ $dpdk_support == "yes" ]]; then
 	meson build &>> $logfile
 	error_check 'DPDK meson build'
 	
+	print_status 'Performing ninja build for DPDK sources..'
+	print_notification 'This may take a moment or two. To view progress, consider opening another terminal window and running tail -f /var/log/autosuricata.log'
 	ninja -C build &>> $logfile
 	error_check 'DPDK ninja build'
 	cd /usr/src
