@@ -101,6 +101,8 @@ This script is released under the MIT license. There is no warranty for this sof
 A big thanks to @inliniac and the rest of the OISF dev team for being so approachable, and writing good, accessible documentation.
 		
 ## Patch Notes
+ - 10-26-23
+    - Fixed an issue where tar wasn't decompressing the DPDK download correctly.
  - 10-15-23
 	- Long Time no See! Suricata 7.x came out some time ago, and with it, some changes to the package requirements.
 		- Pulled the latest set of recommended installation packages from https://docs.suricata.io/en/latest/install.html (as of mine writing this, "latest" stable is 7.0.1)

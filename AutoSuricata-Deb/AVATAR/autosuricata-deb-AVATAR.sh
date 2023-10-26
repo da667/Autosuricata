@@ -200,7 +200,7 @@ if [[ $dpdk_support == "yes" ]]; then
 	error_check 'Download of DPDK sources'
 	print_notification 'If this task failed, please check your network connection and/or submit a github issue for me to check for a new LTS build'
 	
-	tar -xzvf dpdk-22.11.3.tar.xz &>> $logfile
+	tar -xJvf dpdk-22.11.3.tar.xz &>> $logfile
 	error_check 'Untar of DPDK sources'
 	
 	cd dpdk-stable-22.11.3 &>> $logfile
