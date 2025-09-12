@@ -34,7 +34,7 @@ These are the specs for the VM I used to test this script. As with most software
 
 ## What does this script do *exactly*?
 AutoSuricata automates all of the following tasks:
- - Installs all of the package prerequisites available from the Ubuntu repositories for Suricata
+ - Installs all of the package prerequisites available via whatever `apt` repos your distro uses
  - Installs `vectorscan` from source for hyperscan support
  - Installs `DPDK` to support its usage as well
  - Installs the latest build of Suricata
