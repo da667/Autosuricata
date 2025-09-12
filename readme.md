@@ -21,6 +21,7 @@ https://suricata.readthedocs.io
  - [ ] 3 network interfaces (one for management traffic, two for inline operation)
 
 These are the specs for the VM I used to test this script. As with most software, the more resources it has available, the better it will perform. Suricata has always been multi-threaded, so more CPU cores is never a bad thing.
+
 **Note:** most compilation tasks for this script are configured to use `make -j` or an equivalent to compile with multiple threads. Sometimes if memory is too low, this can cause the OOM killer to come by and start reaping random processes. So... it's best to run this script when the system is **IDLE**.
 
 **OS Recommendations:** This script has been tested on Ubuntu 20.04, 24.04, and Debian 13. If you want to use another Debian-based distro, be my guest. *However* that is entirely unsupported and untested.
