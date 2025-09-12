@@ -7,7 +7,7 @@ This script is primarily for students attempting to build Suricata for my book, 
 I'll get into the details of what this script does in a little bit.
 
 ## Supported Operating Systems
-As of right now, Autosuricata is supported on Ubuntu 20.04 and 18.04. This script is entirely built off of Suricata's read the docs documentation and recommendations.
+As of right now, Autosuricata is supported on Ubuntu 22.04, 24.04, and Debian 13. This script is entirely built off of Suricata's read the docs documentation and recommendations.
 
 https://suricata.readthedocs.io
 
