@@ -151,20 +151,22 @@ release=`lsb_release -r|awk '{print $2}'`
 
 #These packages are recommended to build suricata to support most of its features. I also included libhyperscan-dev to enable hyperscan support.
 
-if [[ $release == "20."* || "22."* ]]; then
-	print_status "Installing Recommended Packages: autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev.."
+if [[ $release == "22."* || "24."* ]]; then
+	print_status "Installing Recommended Packages: autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev.."
 
-	declare -a packages=( autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev );
+	declare -a packages=( autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 else
-	print_notification "This script has only been tested with Ubuntu 20.04+. It may work on other .deb-based distros, it may not. YMMV. Please report failures as github issues."
-	print_status "Attempting to Install Recommended Packages: autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev  libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev.."
+	print_notification "This script has only been tested with Ubuntu 22.04+. It may work on other .deb-based distros, it may not. YMMV. Please report failures as github issues."
+	print_status "Attempting to Install Recommended Packages: autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev.."
 
-	declare -a packages=( autoconf automake build-essential ccache clang curl git gosu jq libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libhyperscan-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libpcap-dev libpcre2-dev libtool libyaml-0-2 libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-yaml sudo zlib1g zlib1g-dev );
+	declare -a packages=( autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 fi
+
+
 
 ########################################
 #currently there are no rustc or cargo packages available on 18.04 and according to the rust language webpage, the language is subject to rapid change. So, we're going to install rustc and cargo through the rust-init shell script, instead of relying on the package manager.
@@ -184,37 +186,84 @@ cargo install --force --debug cbindgen &>> $logfile
 error_check 'Installation of cbindgen'
 
 ########################################
-#using pip to install suricata-update, and pyyaml, which suricata 4.1.0+ needs in order to run make install-full now.
-#installing pyelftools in order to support dpdk.
+#downloading, compiling and installing libpcre v 8.45 for vectorscan
 
-print_status "Installing pyyaml, and suricata-update.."
-pip3 install --upgrade pyelftools pyyaml suricata-update &>> $logfile
-error_check 'Install of pyyaml and suricata-update'
+print_status "Downloading, compiling, and installing libpcre-8.45.."
+
+cd /usr/src &>> $logfile
+retry 3 wget https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.gz/download -O pcre-8.45.tar.gz &>> $logfile
+error_check "Download of vectorscan libpcre-8.45"
+
+tar -xzvf pcre-8.45.tar.gz &>> $logfile
+error_check 'Untar of libpcre-8.45 sources'
+
+cd pcre-8.45/ &>> $logfile
+
+./configure &>> $logfile
+error_check 'configure of libpcre-8.45 sources'
+
+make -j $(nproc) &>> $logfile
+error_check 'make of libpcre-8.45 sources'
+
+make install &>> $logfile
+error_check 'make install of libpcre-8.45 sources'
+
+#installing vectorscan
+#vectorscan is the supported drop-in replacement for hyperscan, since Intel just kinda pulled the plug on the open-source version..
+
+print_status "Downloading, compiling, and installing vectorscan.."
+
+cd /usr/src &>> $logfile
+
+#if the vectorscan library already exists, git clone fails. So we remove it, if it exists.
+if [ -d /usr/src/vectorscan ]; then
+	rm -rf /usr/src/vectorscan
+fi
+
+git clone https://github.com/VectorCamp/vectorscan &>> $logfile
+error_check "Download of vectorscan repo"
+
+cd /usr/src/vectorscan &>> $logfile
+dir_check vectorscan-build
+cd /usr/src/vectorscan/vectorscan-build &>> $logfile
+cmake -DBUILD_SHARED_LIBS=On ../ &>> $logfile
+error_check "CMake of vectorscan"
+
+make -j $(nproc) &>> $logfile
+error_check 'Make vectorscan'
+
+make install &>> $logfile
+error_check 'Installation of vectorscan'
+ldconfig
 
 ########################################
 #If users want dpdk support, then we need to acquire dpdk sources and build them. The builds for meson and ninja _shouldn't_ fail, but if they do, exit the script.
 if [[ $dpdk_support == "yes" ]]; then
 
 	print_status 'Downloading and installing DPDK..'
-	retry 3 wget http://fast.dpdk.org/rel/dpdk-22.11.3.tar.xz &>> $logfile
+	retry 3 wget http://fast.dpdk.org/rel/dpdk-24.11.3.tar.xz &>> $logfile
 	error_check 'Download of DPDK sources'
 	print_notification 'If this task failed, please check your network connection and/or submit a github issue for me to check for a new LTS build'
 	
-	tar -xJvf dpdk-22.11.3.tar.xz &>> $logfile
+	tar -xJvf dpdk-24.11.3.tar.xz &>> $logfile
 	error_check 'Untar of DPDK sources'
 	
-	cd dpdk-stable-22.11.3 &>> $logfile
+	cd dpdk-stable-24.11.3 &>> $logfile
 	
 	print_status 'Attempting meson and ninja builds for DPDK sources..'
 	print_notification 'If either of these tasks fail, and the autosuricata_install.log is NOT helpful, consider changing the dpdk_support variable in full_autosuricata.conf to dpdk_support=no'
 	
-	meson build &>> $logfile
+	meson setup build &>> $logfile
 	error_check 'DPDK meson build'
 	
 	print_status 'Performing ninja build for DPDK sources..'
+	cd build
 	print_notification 'This may take a moment or two. To view progress, consider opening another terminal window and running tail -f /var/log/autosuricata.log'
-	ninja -C build &>> $logfile
+	ninja -j $(nproc) &>> $logfile
 	error_check 'DPDK ninja build'
+	meson install
+	error_check 'DPDK meson install'
+	ldconfig
 	cd /usr/src
 fi
 
@@ -252,7 +301,7 @@ else
 	error_check 'Configure Suricata without DPDK support'
 fi
 
-make &>> $logfile
+make -j $(nproc) &>> $logfile
 error_check 'Make Suricata'
 
 make install-full &>> $logfile

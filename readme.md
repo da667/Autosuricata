@@ -21,18 +21,21 @@ https://suricata.readthedocs.io
  - [ ] 3 network interfaces (one for management traffic, two for inline operation)
 
 These are the specs for the VM I used to test this script. As with most software, the more resources it has available, the better it will perform. Suricata has always been multi-threaded, so more CPU cores is never a bad thing.
+**Note:** most compilation tasks for this script are configured to use `make -j` or an equivalent to compile with multiple threads. Sometimes if memory is too low, this can cause the OOM killer to come by and start reaping random processes. So... it's best to run this script when the system is **IDLE**.
 
-**OS Recommendations:** This script has been tested on Ubuntu 20.04 and above. If you want to use another Debian-based distro, be my guest. *However* that is entirely unsupported and untested.
+**OS Recommendations:** This script has been tested on Ubuntu 20.04, 24.04, and Debian 13. If you want to use another Debian-based distro, be my guest. *However* that is entirely unsupported and untested.
 
 **Other Recommendations:** 
 
-**This script takes a significant period of time to run.** Suricata will take a little bit of time to compile. If you're using the minimum system requirements, you'll need at least 30+ minutes for it to compile and configure everything. That's also assuming a moderately decent internet connection required to download everything.
+**This script takes a significant period of time to run.** Suricata (and especially the `vectorscan` and `DPDK` components) will take a little bit of time to compile. If you're using the minimum system requirements, you'll need at least 30+ minutes for it to compile and configure everything. That's also assuming a moderately decent internet connection.
 
 **This script defaults to assuming you want to run Suricata in inline mode.** If you don't want that, I'll show you how to undo that in a little bit.
 
 ## What does this script do *exactly*?
 AutoSuricata automates all of the following tasks:
- - Installs all of the prerequisites available from the Ubuntu repositories for Suricata
+ - Installs all of the package prerequisites available from the Ubuntu repositories for Suricata
+ - Installs `vectorscan` from source for hyperscan support
+ - Installs `DPDK` to support its usage as well
  - Installs the latest build of Suricata
 	- Creates the `suricata` system user and group in order for the suricata process to drop its privileges after startup
 	- Configures Suricata for inline operation through the included `af-packet.yaml` file.
@@ -82,8 +85,8 @@ Fun fact: the `suricata_iface_1` and `suricata_iface_2` options in `full_autosur
 		- `systemctl disable suricatad.service`
 		- `rm -rf /etc/systemd/system/suricatad.service`
 	- To modify the file for passive operation, perform the following actions:
-		- To stop inline mode operation, the `-afpacket` option will need to be removed from the suricata command (line 18 `suricatad.service`). 
-		- after removing `-afpacket`, Add the `-i [interface_name]` command line argument to line 18 define the network interface you'd like to use for IDS mode operation.
+		- To stop inline mode operation, the `--afpacket` option will need to be removed from the suricata command (line 18 `suricatad.service`). 
+		- after removing `--afpacket`, Add the `-i [interface_name]` command line argument to line 18 define the network interface you'd like to use for IDS mode operation.
 		- On lines 14 and 16, make sure you add the interface name you defined on line 18.
 			- e.g. `/usr/sbin/ip link set up promisc on arp off multicast off dev [interface name]`
 			- e.g. `/usr/sbin/ethtool -K [interface name] rx off tx off gro off lro off`
@@ -101,8 +104,26 @@ This script is released under the MIT license. There is no warranty for this sof
 A big thanks to @inliniac and the rest of the OISF dev team for being so approachable, and writing good, accessible documentation.
 		
 ## Patch Notes
- - 10-26-23
+ - 9-12-25
+	- Apparently I had fixes for some things on my LOCAL system for two years that I never pushed properly. Apologies for that.
+	- Ubuntu version checks have changed to Ubuntu `22.*` and `24.*`. from 20 and 22.
+	- Removed duplicate entry in package installation routine for `libyaml-0-2`
+	- Removed `libhyperscan-dev`, and added in a routine for install vectorscan from source, instead. 
+	  - Libhyperscan was an open-source Intel project... until it wasn't. Vectorscan is the replacement.
+	  - This required me to add the `cmake`, `libboost-all-dev` and `ragel` packages to the package installation routine.
+	  - This also requires libpcre v8.41 or better. Which Ubuntu doesn't have. So we grab pcre-8.45 from sourceforge, and compile it.
+	  - Vectorscan takes a little while to compile from source. This is normal.
     - Fixed an issue where tar wasn't decompressing the DPDK download correctly.
+	- DPDK support for suricata also apparently triggers a requirement for `libnuma-dev` as well so I added that to the install package list.
+	  - speaking of DPDK support, the latest LTS release is 24.11.3, so we're pulling that down now.
+	  - The script wasn't actually 'installing' the dpdk libraries to put them in a place where Suricata could find them, so that has been fixed as well 
+	  - `meson install` and `ldconfig` weren't being ran, so the DPDK stuff was literally **right there** and not being used for DPDK support).
+	  - like with vectorscan, DPDK support takes a while to compile. Be patient, and/or open another terminal session to `tail -f /var/log/autosuricata_install.log` to see what's going on.
+	- Python versions greater than 3.11 insist that if you use `pip` to install literally anything, and you did so without a virtual-env, you are immediately executed as a heretic. Pointless and irritating, but that's python for you.
+	  - As a direct result, `pyyaml` and `pyelftools` are both installed from `apt-get` via the package names: `python3-yaml` and `python3-pyelftools`
+	- Anything that uses `make` to compile software has been changed to `make -j $(nproc)`. We multi-threaded now. 
+	  - Be aware that, sometimes this triggers massively high CPU and memory usage, and could trigger the OOM killer to crash the system, if there are too many other things going on while software is compiling.
+	- added `ethtool` to the package installation routine, as its not installed on Debian by default, and will cause issues starting, as ethtool is ran prior to starting the suricata service to disable NIC offloading (as per Suricata read the docs guidance)
  - 10-15-23
 	- Long Time no See! Suricata 7.x came out some time ago, and with it, some changes to the package requirements.
 		- Pulled the latest set of recommended installation packages from https://docs.suricata.io/en/latest/install.html (as of mine writing this, "latest" stable is 7.0.1)
