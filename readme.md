@@ -36,7 +36,8 @@ These are the specs for the VM I used to test this script. As with most software
 AutoSuricata automates all of the following tasks:
  - Installs all of the package prerequisites available via whatever `apt` repos your distro uses
  - Installs `vectorscan` from source for hyperscan support
- - Installs `DPDK` to support its usage as well
+ - Installs `DPDK` to support its usage -- controlled by the configuration file, `full_autosuricata.conf`
+ - Installs `nDPI` to support nDPI functions introduced in Suricata 8 -- controled by the configuration file, `full_autosuricata.conf`
  - Installs the latest build of Suricata
 	- Creates the `suricata` system user and group in order for the suricata process to drop its privileges after startup
 	- Configures Suricata for inline operation through the included `af-packet.yaml` file.
@@ -69,7 +70,8 @@ AutoSuricata automates all of the following tasks:
  3. cd into `Autosuricata/AutoSuricata-Deb/AVATAR`
  4. using your favorite text editor, open `full_autosuricata.conf`
  5. input the names of the network interfaces you'd like to bridge together for inline mode (if you want to use inline mode) in the `suricata_iface_1=` (line 12) and `suricata_iface_2=` (line 20) fields. For example, the script defaults to the interface names `eth1` and `eth2`.
- 6. the script file, `autosuricata-deb-AVATAR.sh`, needs to specifically be ran with the `bash` interpreter, and with `root` permissions.
+ 6. If you'd like to compile Suricata with DPDK and nDPI support, ensure that both `dpdk_support` and `nDPI_support` are both set to `yes` on lines 27 and 34, respectively. Otherwise, set the values to `no` if you don't want them.
+ 7. the script file, `autosuricata-deb-AVATAR.sh`, needs to specifically be ran with the `bash` interpreter, and with `root` permissions.
 - If you downloaded the script as the `root` user, `bash autosuricata-deb-AVATAR.sh` will work
 - Alternatively, as the `root` user: `chmod u+x autosuricata-deb-AVATAR.sh && ./autosuricata-deb-AVATAR.sh`
 - or via `sudo`: `sudo bash autosuricata-deb-AVATAR.sh`, etc.
@@ -105,6 +107,20 @@ This script is released under the MIT license. There is no warranty for this sof
 A big thanks to @inliniac and the rest of the OISF dev team for being so approachable, and writing good, accessible documentation.
 		
 ## Patch Notes
+ - 2-15-26
+    - This update adds support for nDPI
+	  - The build script currently acquires and compiles version 4.14. *"why not 5.0?"*
+	    - In a nutshell, there are some API changes with 5.0 that Suricata isn't supporting just yet, and there's dispute as to who is responsible to fix it.
+		- https://github.com/ntop/nDPI/issues/3072
+		- Soon as whoever changes whatever has to be changed, I have some commented out code that should work to grab the latest nDPI release.
+	- Updated the version of DPDK to 25.11.0, the latest LTS release.
+	- `full_autosuricata.conf` has been updated, and has a new configuration option -- `nDPI_support`.
+	  - By default, this value is set to `yes` in order to download nDPI 4.14, and compile Suricata with the nDPI plugin enabled.
+	  - For more information about nDPI, check out the Suricata documentation here: https://docs.suricata.io/en/suricata-8.0.3/plugins/ndpi.html
+	  - Changing the option to "no" can be used to configure Suricata source *without* nDPI support, just like with DPDK support.
+	- Changed how the configure portion of Suricata works in the script. 
+	  - Decided that retrying to configure the source for compilation WITHOUT the feature the user wants is kinda presumptuous, so instead, the script exits, and the user can review the logs to fix the error, get me involved, or reconfigure `full_autosuricata.conf` to configure the source without nDPI or DPDK support.
+	- Updated the documentation to reflect these new options and how enable and/or disable support for them.
  - 9-12-25
 	- Apparently I had fixes for some things on my LOCAL system for two years that I never pushed properly. Apologies for that.
 	- Ubuntu version checks have changed to Ubuntu `22.*` and `24.*`. from 20 and 22.

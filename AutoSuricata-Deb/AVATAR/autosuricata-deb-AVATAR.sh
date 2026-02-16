@@ -152,16 +152,16 @@ release=`lsb_release -r|awk '{print $2}'`
 #These packages are recommended to build suricata to support most of its features. I also included libhyperscan-dev to enable hyperscan support.
 
 if [[ $release == "22."* || "24."* ]]; then
-	print_status "Installing Recommended Packages: autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev.."
+	print_status "Installing Recommended Packages: autoconf automake bison build-essential ccache clang cmake curl ethtool flex gettext git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev libjson-c-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev librrd-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev.."
 
-	declare -a packages=( autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev );
+	declare -a packages=( autoconf automake bison build-essential ccache clang cmake curl ethtool flex gettext git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev libjson-c-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev librrd-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 else
 	print_notification "This script has only been tested with Ubuntu 22.04+. It may work on other .deb-based distros, it may not. YMMV. Please report failures as github issues."
-	print_status "Attempting to Install Recommended Packages: autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev.."
+	print_status "Attempting to Install Recommended Packages: autoconf automake bison build-essential ccache clang cmake curl ethtool flex gettext git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev libjson-c-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev librrd-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev.."
 
-	declare -a packages=( autoconf automake build-essential ccache clang cmake curl ethtool git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev );
+	declare -a packages=( autoconf automake bison build-essential ccache clang cmake curl ethtool flex gettext git gosu jq libboost-all-dev libbpf-dev libcap-ng0 libcap-ng-dev libelf-dev libevent-dev libgeoip-dev libmaxminddb-dev libhiredis-dev libjansson-dev libjson-c-dev liblua5.1-dev libluajit-5.1-dev liblz4-dev liblzma-dev libmagic-dev libnet1-dev libnuma-dev libpcap-dev libpcre2-dev libsqlite3-dev librrd-dev libtool libyaml-0-2 libyaml-dev m4 make meson pkg-config pip python3 python3-dev python3-pyelftools python3-yaml ragel sudo zlib1g zlib1g-dev );
 	
 	install_packages ${packages[@]}
 fi
@@ -241,14 +241,14 @@ ldconfig
 if [[ $dpdk_support == "yes" ]]; then
 
 	print_status 'Downloading and installing DPDK..'
-	retry 3 wget http://fast.dpdk.org/rel/dpdk-24.11.3.tar.xz &>> $logfile
+	retry 3 wget http://fast.dpdk.org/rel/dpdk-25.11.tar.xz &>> $logfile
 	error_check 'Download of DPDK sources'
 	print_notification 'If this task failed, please check your network connection and/or submit a github issue for me to check for a new LTS build'
 	
-	tar -xJvf dpdk-24.11.3.tar.xz &>> $logfile
+	tar -xJvf dpdk-25.11.tar.xz &>> $logfile
 	error_check 'Untar of DPDK sources'
 	
-	cd dpdk-stable-24.11.3 &>> $logfile
+	cd dpdk-25.11 &>> $logfile
 	
 	print_status 'Attempting meson and ninja builds for DPDK sources..'
 	print_notification 'If either of these tasks fail, and the autosuricata_install.log is NOT helpful, consider changing the dpdk_support variable in full_autosuricata.conf to dpdk_support=no'
@@ -261,9 +261,30 @@ if [[ $dpdk_support == "yes" ]]; then
 	print_notification 'This may take a moment or two. To view progress, consider opening another terminal window and running tail -f /var/log/autosuricata.log'
 	ninja -j $(nproc) &>> $logfile
 	error_check 'DPDK ninja build'
-	meson install
+	meson install &>> $logfile
 	error_check 'DPDK meson install'
 	ldconfig
+	cd /usr/src
+fi
+
+########################################
+#If users want nDPI support, then we need to acquire nDPI sources and build them.
+#Currently pulling down nDPI 4.10, because later releases aren't supported because of some API changes.
+#There's a territorial dispute as to whose problem it is right now to fix it, so until then, we're just grabbing 4.10 and calling it a day.
+if [[ $nDPI_support == "yes" ]]; then
+    #neat one-liner for pulling the latest build from github, then feeding that into a wget command.
+	# saving for later. 5.0 makes API changes and isn't yet supported by suricata.
+    #ndpi_latest=`curl -s https://api.github.com/repos/ntop/nDPI/releases | grep "tarball_url." | head -1 | cut -d : -f 2,3 | cut -d \" -f2`
+    print_status 'Downloading and installing nDPI..'
+	# saving for later when support for ndpi 5.0 is fixed.
+	#retry 3 wget $ndpi_latest -O nDPI_latest.tar.gz &>> $logfile
+	retry 3 wget https://github.com/ntop/nDPI/archive/refs/tags/4.14.tar.gz -O nDPI_4.14.tar.gz &>> $logfile
+	tar -xzvf nDPI_4.14.tar.gz &>> $logfile
+	cd nDPI-4.14
+	./autogen.sh &>> $logfile
+	./configure &>> $logfile
+	make -j &>> $logfile
+	error_check 'nDPI compile'
 	cd /usr/src
 fi
 
@@ -282,23 +303,31 @@ suricata_ver=`ls -1 | egrep "suricata-[0-9]" | head -1`
 cd $suricata_ver
 
 print_status "Configuring suricata, making and installing. This will take a moment or two.."
-
-if [[ $dpdk_support == "yes" ]]; then
-	print_status 'Attempting build with DPDK support..'
+#Attempe to configure Suricata, with the options the user wants. If that configure state fails, then the script bails, instead of trying to compile without the requested features.
+#Make it a choice of the user, instead of assuming they want to continue without their desired features.
+#Option 1: with DPDK and nDPI (default)
+if [[ $dpdk_support == "yes" && $nDPI_support == "yes" ]]; then
+    print_status 'Attempting build with DPDK and nDPI support..'
+	./configure --enable-lua --enable-geoip --enable-hiredis --enable-dpdk --enable-ndpi --with-ndpi=/usr/src/nDPI-4.14 &>> $logfile
+	error_check 'Configure Suricata with DPDK and nDPI support'
+fi
+#Option 2: without DPDK
+if [[ $dpdk_support != "yes" && $nDPI_support == "yes" ]]; then
+    print_status 'Attempting build with nDPI support (no DPDK)..'
+	./configure --enable-lua --enable-geoip --enable-hiredis --enable-ndpi --with-ndpi=/usr/src/nDPI-4.14 &>> $logfile
+	error_check 'Configure Suricata with nDPI support (no DPDK)'
+fi
+# Option 3: without nDPI
+if [[ $dpdk_support == "yes" && $nDPI_support != "yes" ]]; then
+    print_status 'Attempting build with DPDK support (no nDPI)..'
 	./configure --enable-lua --enable-geoip --enable-hiredis --enable-dpdk &>> $logfile
-	
-	#Fall back to compiling without DPDK if the configure command failed.
-	if [ $? -eq 0 ]; then
-		print_good "Configure Suricata with DPDK support Successful."
-	else
-		print_notification "Configure with DPDK support failed. Trying again without DPDK support.."
-		./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
-		error_check 'Configure Suricata without DPDK support'
-	fi
-else
-	print_status 'Attempting to configure Suricata without DPDK support..'
+	error_check 'Configure Suricata with DPDK support (no nDPI)'
+fi
+#Option 4: without nDPI or DPDK
+if [[ $dpdk_support != "yes" && $nDPI_support != "yes" ]]; then
+    print_status 'Attempting build without DPDK or nDPI support..'
 	./configure --enable-lua --enable-geoip --enable-hiredis &>> $logfile
-	error_check 'Configure Suricata without DPDK support'
+	error_check 'Configure Suricata wihtout DPDK or nDPI support'
 fi
 
 make -j $(nproc) &>> $logfile
