@@ -107,6 +107,8 @@ This script is released under the MIT license. There is no warranty for this sof
 A big thanks to @inliniac and the rest of the OISF dev team for being so approachable, and writing good, accessible documentation.
 		
 ## Patch Notes
+ - 9/24/26
+    - Added `libsimde-dev` to the list of packages installed with `apt-get`, after experiencing a compilation failure for vectorscan on Debian 13.
  - 2-15-26
     - This update adds support for nDPI
 	  - The build script currently acquires and compiles version 4.14. *"why not 5.0?"*
